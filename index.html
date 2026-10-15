@@ -325,6 +325,9 @@
   footer{padding:60px 0 40px; text-align:center; color:var(--muted); font-size:13px; position:relative; z-index:1;}
   footer .fmark{font-family:'AbarHigh','Vazirmatn',sans-serif; letter-spacing:8px; font-size:20px; color:var(--green); direction:ltr; display:block; margin-bottom:10px; text-indent:8px;}
 
+  .grid3.single{display:flex; justify-content:center;}
+  .grid3.single .branch{width:min(430px,100%);}
+
   /* ===== reveal on scroll (slow & elegant) ===== */
   .reveal{opacity:0; transform:translateY(44px);
     transition:opacity 1.3s var(--ease), transform 1.3s var(--ease);}
@@ -428,13 +431,8 @@
   <div class="wrap">
     <span class="kicker reveal">محصولات</span>
     <h2 class="sec-title reveal d1">جهان بویایی آیریس</h2>
-    <p class="sec-lede reveal d2">رایحه‌ها را با <b>تجربه‌ای که می‌سازند</b> معرفی می‌کنیم؛ نه فقط با نام و قیمت.</p>
-    <div class="cat-tabs reveal" id="catTabs">
-      <button class="cat-tab active" data-cat="niche">عطرهای نیش</button>
-      <button class="cat-tab" data-cat="body">افشانه تن</button>
-      <button class="cat-tab" data-cat="home">افشانه خانه</button>
-      <button class="cat-tab" data-cat="diffuser">دیفیوزر</button>
-    </div>
+    <p class="sec-lede reveal d2" id="prodLede"></p>
+    <div class="cat-tabs reveal" id="catTabs"></div>
     <div id="prodArea"></div>
   </div>
 </section>
@@ -457,12 +455,8 @@
   <div class="wrap">
     <span class="kicker reveal">شعبه‌های حضوری</span>
     <h2 class="sec-title reveal d1">آیریس را از نزدیک تجربه کنید</h2>
-    <p class="sec-lede reveal d2">رایحه را باید روی پوست تجربه کرد. منتظر حضور شما در شعبه‌هایمان هستیم.</p>
-    <div class="grid3">
-      <div class="branch reveal"><div class="pin">📍</div><h3>شعبه آرینا سنتر</h3><p>فضایی برای کشف آرام رایحه‌ها و گفت‌وگو با کارشناسان آیریس.</p><div class="addr">ساعات کاری: ۱۰ صبح تا ۱۰ شب<br>آدرس: به‌زودی</div></div>
-      <div class="branch reveal d1"><div class="pin">📍</div><h3>شعبه ولیعصر</h3><p>در قلب تپنده شهر؛ تجربه‌ای متفاوت از خرید عطر.</p><div class="addr">ساعات کاری: ۱۰:۳۰ صبح تا ۹ شب<br>آدرس: به‌زودی</div></div>
-      <div class="branch reveal d2"><div class="pin">📍</div><h3>شعبه نیایش</h3><p>ترکیب آرامش و دقت؛ برای انتخابی بدون عجله.</p><div class="addr">ساعات کاری: ۱۱ صبح تا ۱۰:۳۰ شب<br>آدرس: به‌زودی</div></div>
-    </div>
+    <p class="sec-lede reveal d2" id="branchLede"></p>
+    <div class="grid3" id="branchGrid"></div>
   </div>
 </div>
 
@@ -499,6 +493,7 @@
     clearTimeout(window.__irisThemeT);
     window.__irisThemeT = setTimeout(function(){ document.body.classList.remove('theming'); }, 1100);
     if (save !== false) { try { localStorage.setItem('iris-theme', t); } catch(e){} }
+    if (window.__renderBrandSections) { window.__renderBrandSections(t === 'dokan' ? 'dokan' : 'atr'); }
   }
   btns.forEach(function(b){
     b.addEventListener('click', function(){ setTheme(b.getAttribute('data-theme-btn')); });
@@ -508,16 +503,39 @@
   setTheme(saved === 'dokan' ? 'dokan' : 'atr', false);
 })();
 
-/* ===== products data ===== */
-var PRODUCTS = {
-  niche: { title:'عطرهای نیش', soon:'<b>قلب تپنده آیریس.</b><br>معرفی کامل عطرهای نیش به‌زودی در همین‌جا قرار می‌گیرد.' },
-  body: { title:'افشانه تن', items:['کژال','لیمان','گیسوم','جیران','فریاد'] },
-  home: { title:'افشانه خانه', items:['آتش','خاک','خنکا'] },
-  diffuser: { title:'دیفیوزر', items:['آتش','خاک','باد','آب'] }
+/* ===== محتوای برندمحور : محصولات و شعبه‌ها ===== */
+var BRAND_CONTENT = {
+  atr: {
+    prodLede: 'عطر آیریس فقط <b>عطر</b> تولید می‌کند؛ رایحه‌هایی مستقل، نیش و دست‌ساز.',
+    tabs: [ {id:'niche', label:'عطرهای نیش'} ],
+    cats: {
+      niche: { title:'عطرهای نیش', soon:'<b>قلب تپنده آیریس.</b><br>معرفی کامل عطرهای نیش به‌زودی در همین‌جا قرار می‌گیرد.' }
+    },
+    branchLede: 'رایحه را باید روی پوست تجربه کرد. منتظر حضور شما در شعبه‌هایمان هستیم.',
+    branches: [
+      {name:'شعبه آرینا سنتر', desc:'فضایی برای کشف آرام رایحه‌ها و گفت‌وگو با کارشناسان آیریس.', hours:'ساعات کاری: ۱۰ صبح تا ۱۰ شب'},
+      {name:'شعبه ولیعصر', desc:'در قلب تپنده شهر؛ تجربه‌ای متفاوت از خرید عطر.', hours:'ساعات کاری: ۱۰:۳۰ صبح تا ۹ شب'},
+      {name:'شعبه نیایش‌مال', desc:'ترکیب آرامش و دقت؛ برای انتخابی بدون عجله.', hours:'ساعات کاری: ۱۱ صبح تا ۱۰:۳۰ شب'}
+    ]
+  },
+  dokan: {
+    prodLede: 'دکان آیریس <b>زیرمجموعه‌ای از برند آیریس</b> است؛ محصولاتی برای <b>خوشبو شدن منزل</b> و <b>بهداشت شخصی</b>.',
+    tabs: [ {id:'body', label:'افشانه تن'}, {id:'home', label:'افشانه خانه'}, {id:'diffuser', label:'دیفیوزر'} ],
+    cats: {
+      body: { title:'افشانه تن', items:['کژال','لیمان','گیسوم','جیران','فریاد'] },
+      home: { title:'افشانه خانه', items:['آتش','خاک','خنکا'] },
+      diffuser: { title:'دیفیوزر', items:['آتش','خاک','باد','آب'] }
+    },
+    branchLede: 'دکان آیریس در حال حاضر فقط در <b>شعبه نیایش‌مال</b> حضور دارد.',
+    branches: [
+      {name:'شعبه نیایش‌مال', desc:'ترکیب آرامش و دقت؛ برای انتخابی بدون عجله.', hours:'ساعات کاری: ۱۱ صبح تا ۱۰:۳۰ شب'}
+    ]
+  }
 };
-var area = document.getElementById('prodArea');
+var currentCats = {};
 function renderCat(cat){
-  var c = PRODUCTS[cat];
+  var c = currentCats[cat]; if(!c) return;
+  var area = document.getElementById('prodArea');
   if (c.soon) {
     area.innerHTML = '<div class="soon">' + c.soon + '</div>';
     return;
@@ -530,13 +548,42 @@ function renderCat(cat){
   });
   area.innerHTML = html + '</div>';
 }
+function renderProducts(theme){
+  var bc = BRAND_CONTENT[theme];
+  currentCats = bc.cats;
+  document.getElementById('prodLede').innerHTML = bc.prodLede;
+  var tabs = document.getElementById('catTabs');
+  tabs.innerHTML = bc.tabs.map(function(t, i){
+    return '<button class="cat-tab' + (i===0 ? ' active' : '') + '" data-cat="' + t.id + '">' + t.label + '</button>';
+  }).join('');
+  renderCat(bc.tabs[0].id);
+}
+function renderBranches(theme){
+  var bc = BRAND_CONTENT[theme];
+  document.getElementById('branchLede').innerHTML = bc.branchLede;
+  var grid = document.getElementById('branchGrid');
+  grid.classList.toggle('single', bc.branches.length === 1);
+  grid.innerHTML = bc.branches.map(function(b, i){
+    var d = i===1 ? ' d1' : (i===2 ? ' d2' : '');
+    return '<div class="branch reveal' + d + '"><div class="pin">📍</div><h3>' + b.name + '</h3><p>' + b.desc + '</p>' +
+      '<div class="addr">' + b.hours + '<br>آدرس: به‌زودی</div></div>';
+  }).join('');
+  if (window.__irisIO) {
+    grid.querySelectorAll('.reveal:not(.in)').forEach(function(el){ window.__irisIO.observe(el); });
+  }
+}
+function renderBrandSections(theme){
+  renderProducts(theme);
+  renderBranches(theme);
+}
+window.__renderBrandSections = renderBrandSections;
+renderBrandSections(document.documentElement.getAttribute('data-theme') === 'dokan' ? 'dokan' : 'atr');
 document.getElementById('catTabs').addEventListener('click', function(e){
   var b = e.target.closest('.cat-tab'); if(!b) return;
   this.querySelectorAll('.cat-tab').forEach(function(t){ t.classList.remove('active'); });
   b.classList.add('active');
   renderCat(b.dataset.cat);
 });
-renderCat('niche');
 
 /* ===== marquee duplicate for seamless loop ===== */
 (function(){
@@ -551,6 +598,7 @@ renderCat('niche');
       if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
     });
   }, {threshold:.12, rootMargin:'0px 0px -6% 0px'});
+  window.__irisIO = io;
   document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
 })();
 
